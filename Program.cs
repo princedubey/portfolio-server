@@ -84,8 +84,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Remove HTTPS redirection for development
-// app.UseHttpsRedirection();
+// Only use HTTPS redirection in production
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowAll");
 app.UseAuthentication();
@@ -93,10 +96,19 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Apply migrations automatically
-using (var scope = app.Services.CreateScope())
+try
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.Migrate();
+    }
+}
+catch (Exception ex)
+{
+    // Log the error but don't fail the application startup
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occurred while applying database migrations");
 }
 
 app.Run();
