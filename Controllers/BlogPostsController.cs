@@ -18,6 +18,13 @@ namespace BlogManagementSystem.Controllers
             _seoService = seoService;
         }
 
+        // GET: api/BlogPosts/health
+        [HttpGet("health")]
+        public ActionResult<string> Health()
+        {
+            return Ok("Blog Posts API is running!");
+        }
+
         // GET: api/BlogPosts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BlogPost>>> GetBlogPosts()
